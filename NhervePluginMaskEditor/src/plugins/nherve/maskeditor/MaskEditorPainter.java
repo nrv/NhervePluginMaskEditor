@@ -38,6 +38,7 @@ class MaskEditorPainter implements Painter, MouseWheelListener {
 	 */
 	public MaskEditorPainter() {
 		super();
+		System.err.println(" -- MaskEditorPainter created");
 		setSequence(null);
 	}
 
@@ -48,6 +49,7 @@ class MaskEditorPainter implements Painter, MouseWheelListener {
 	 */
 	@Override
 	protected void finalize() throws Throwable {
+		System.err.println(" -- MaskEditorPainter finalized");
 		super.finalize();
 	}
 
