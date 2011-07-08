@@ -38,19 +38,7 @@ class MaskEditorPainter implements Painter, MouseWheelListener {
 	 */
 	public MaskEditorPainter() {
 		super();
-		System.err.println(" -- MaskEditorPainter created");
 		setSequence(null);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#finalize()
-	 */
-	@Override
-	protected void finalize() throws Throwable {
-		System.err.println(" -- MaskEditorPainter finalized");
-		super.finalize();
 	}
 
 	/**

@@ -323,12 +323,6 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 			Thread.currentThread().setContextClassLoader(backup);
 		}
 	}
-	
-	@Override
-	protected void finalize() throws Throwable {
-		System.err.println(" ------ MaskEditor finalized ------");
-		super.finalize();
-	}
 
 	/*
 	 * (non-Javadoc)
