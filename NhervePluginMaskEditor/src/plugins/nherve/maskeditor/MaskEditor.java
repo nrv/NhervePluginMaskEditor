@@ -29,6 +29,7 @@ import icy.main.Icy;
 import icy.plugin.PluginDescriptor;
 import icy.plugin.PluginLauncher;
 import icy.plugin.PluginLoader;
+import icy.preferences.XMLPreferences;
 import icy.roi.ROI;
 import icy.roi.ROI2D;
 import icy.sequence.Sequence;
@@ -59,7 +60,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.prefs.Preferences;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -143,9 +143,6 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 
 	/** The Constant FULL_PLUGIN_NAME. */
 	private final static String FULL_PLUGIN_NAME = PLUGIN_NAME + " V" + PLUGIN_VERSION;
-
-	/** The Constant PREFERENCES_NODE. */
-	private final static String PREFERENCES_NODE = "icy/plugins/nherve/maskeditor/MaskEditor";
 
 	/** The Constant SHAPE_SQUARE. */
 	private final static String SHAPE_SQUARE = "Square";
@@ -324,6 +321,15 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 		}
 	}
 
+	public void loadForCurrentSequence(File f) throws PersistenceException {
+		MaskPersistence rep = new OptimizedMaskPersistenceImpl();
+		MaskStack s = rep.loadMaskStack(f);
+		s.checkAfterLoad((float) slOpacity.getValue() / 100f, getCurrentSequence().getFirstImage());
+		removeBackupObject(getCurrentSequence());
+		addBackupObject(s);
+		setStack(s);
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -490,34 +496,38 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 				return;
 			}
 
-			if ((b == btSave) || (b == btLoad)) {
+			if (b == btLoad) {
 				try {
 					MaskPersistence rep = new OptimizedMaskPersistenceImpl();
-					if (b == btSave) {
-						String d = getCurrentSequence().getFilename();
-						File df = null;
-						if ((d != null) && (d.length() > 0)) {
-							int idx = d.lastIndexOf(".");
-							if (idx > 0) {
-								d = d.substring(0, idx);
-							}
-							d += rep.getMaskFileExtension();
-							df = new File(d);
-						}
-						File f = displayFileChooser(rep, df);
-						if (f != null) {
-							rep.save(getStack(), f);
-						}
+
+					File f = displayFileChooser(rep, null);
+					if (f != null) {
+						loadForCurrentSequence(f);
 					}
-					if (b == btLoad) {
-						File f = displayFileChooser(rep, null);
-						if (f != null) {
-							MaskStack s = rep.loadMaskStack(f);
-							s.checkAfterLoad((float) slOpacity.getValue() / 100f, getCurrentSequence().getFirstImage());
-							removeBackupObject(getCurrentSequence());
-							addBackupObject(s);
-							setStack(s);
+
+				} catch (PersistenceException e1) {
+					logError(e1.getClass().getName() + " : " + e1.getMessage());
+				}
+				return;
+			}
+
+			if (b == btSave) {
+				try {
+					MaskPersistence rep = new OptimizedMaskPersistenceImpl();
+
+					String d = getCurrentSequence().getFilename();
+					File df = null;
+					if ((d != null) && (d.length() > 0)) {
+						int idx = d.lastIndexOf(".");
+						if (idx > 0) {
+							d = d.substring(0, idx);
 						}
+						d += rep.getMaskFileExtension();
+						df = new File(d);
+					}
+					File f = displayFileChooser(rep, df);
+					if (f != null) {
+						rep.save(getStack(), f);
 					}
 				} catch (PersistenceException e1) {
 					logError(e1.getClass().getName() + " : " + e1.getMessage());
@@ -612,7 +622,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 		fileChooser.setMultiSelectionEnabled(false);
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 
-		Preferences preferences = Preferences.userRoot().node(PREFERENCES_NODE + "/loadsave");
+		XMLPreferences preferences = getPreferences().node("loadsave");
 
 		if (defaultFile != null) {
 			fileChooser.setSelectedFile(defaultFile);
@@ -661,7 +671,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 		fileChooser.setMultiSelectionEnabled(false);
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 
-		Preferences preferences = Preferences.userRoot().node(PREFERENCES_NODE + "/tiffexport");
+		XMLPreferences preferences = getPreferences().node("tiffexport");
 		String path = preferences.get("path", "");
 		fileChooser.setCurrentDirectory(new File(path));
 
@@ -1172,7 +1182,8 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 		JPanel mainPanel = GuiUtil.generatePanel();
 		frame = GuiUtil.generateTitleFrame(FULL_PLUGIN_NAME, mainPanel, new Dimension(580, 100), true, true, true, true);
 		addIcyFrame(frame);
-		new WindowPositionSaver(frame, PREFERENCES_NODE, new Point(0, 0), new Dimension(580, 800));
+		XMLPreferences preferences = getPreferences();
+		new WindowPositionSaver(frame, preferences.absolutePath(), new Point(0, 0), new Dimension(580, 800));
 
 		// mainPanel.setLayout(new BorderLayout());
 
@@ -1307,7 +1318,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 
 		mlp = new JPanel();
 		mlp.setLayout(new BoxLayout(mlp, BoxLayout.PAGE_AXIS));
-		mlp.setMinimumSize(new Dimension(0, 300));
+		// mlp.setMinimumSize(new Dimension(0, 300));
 
 		scroll = new JScrollPane(mlp);
 		mll.add(scroll);
