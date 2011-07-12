@@ -321,8 +321,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 		}
 	}
 
-	public void loadForCurrentSequence(File f) throws PersistenceException {
-		MaskPersistence rep = new OptimizedMaskPersistenceImpl();
+	public void loadForCurrentSequence(File f, MaskPersistence rep) throws PersistenceException {
 		MaskStack s = rep.loadMaskStack(f);
 		s.checkAfterLoad((float) slOpacity.getValue() / 100f, getCurrentSequence().getFirstImage());
 		removeBackupObject(getCurrentSequence());
@@ -502,7 +501,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 
 					File f = displayFileChooser(rep, null);
 					if (f != null) {
-						loadForCurrentSequence(f);
+						loadForCurrentSequence(f, rep);
 					}
 
 				} catch (PersistenceException e1) {
