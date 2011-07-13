@@ -515,15 +515,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 					MaskPersistence rep = new OptimizedMaskPersistenceImpl();
 
 					String d = getCurrentSequence().getFilename();
-					File df = null;
-					if ((d != null) && (d.length() > 0)) {
-						int idx = d.lastIndexOf(".");
-						if (idx > 0) {
-							d = d.substring(0, idx);
-						}
-						d += rep.getMaskFileExtension();
-						df = new File(d);
-					}
+					File df = rep.getMaskFileFor(new File(d));
 					File f = displayFileChooser(rep, df);
 					if (f != null) {
 						rep.save(getStack(), f);
