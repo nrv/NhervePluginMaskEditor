@@ -67,7 +67,6 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -77,7 +76,6 @@ import javax.swing.TransferHandler;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.filechooser.FileFilter;
 
 import loci.formats.FormatException;
 import plugins.nherve.toolbox.NherveToolbox;
@@ -91,6 +89,7 @@ import plugins.nherve.toolbox.image.mask.MaskStack;
 import plugins.nherve.toolbox.image.mask.OptimizedMaskPersistenceImpl;
 import plugins.nherve.toolbox.plugin.BackupAndPainterManagerSingletonPlugin;
 import plugins.nherve.toolbox.plugin.HelpWindow;
+import plugins.nherve.toolbox.plugin.PluginHelper;
 
 /**
  * The Class MaskEditor.
@@ -321,14 +320,6 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 		}
 	}
 
-	public void loadForCurrentSequence(File f, MaskPersistence rep) throws PersistenceException {
-		MaskStack s = rep.loadMaskStack(f);
-		s.checkAfterLoad((float) slOpacity.getValue() / 100f, getCurrentSequence().getFirstImage());
-		removeBackupObject(getCurrentSequence());
-		addBackupObject(s);
-		setStack(s);
-	}
-	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -498,8 +489,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 			if (b == btLoad) {
 				try {
 					MaskPersistence rep = new OptimizedMaskPersistenceImpl();
-
-					File f = displayFileChooser(rep, null);
+					File f = displaySegmentationExport(rep, null);
 					if (f != null) {
 						loadForCurrentSequence(f, rep);
 					}
@@ -513,10 +503,9 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 			if (b == btSave) {
 				try {
 					MaskPersistence rep = new OptimizedMaskPersistenceImpl();
-
 					String d = getCurrentSequence().getFilename();
 					File df = rep.getMaskFileFor(new File(d));
-					File f = displayFileChooser(rep, df);
+					File f = displaySegmentationExport(rep, df);
 					if (f != null) {
 						rep.save(getStack(), f);
 					}
@@ -527,7 +516,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 			}
 		}
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -601,55 +590,10 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 		return painter;
 	}
 
-	/**
-	 * Display file chooser.
-	 * 
-	 * @param repository
-	 *            the repository
-	 * @return the file
-	 */
-	private File displayFileChooser(final MaskPersistence repository, File defaultFile) {
-		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setMultiSelectionEnabled(false);
-		fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-
+	private File displaySegmentationExport(MaskPersistence rep, File df) {
 		XMLPreferences preferences = getPreferences().node("loadsave");
-
-		if (defaultFile != null) {
-			fileChooser.setSelectedFile(defaultFile);
-		} else {
-			String path = preferences.get("path", "");
-			fileChooser.setCurrentDirectory(new File(path));
-		}
-
-		fileChooser.setAcceptAllFileFilterUsed(true);
-		fileChooser.setFileFilter(new FileFilter() {
-			@Override
-			public boolean accept(File f) {
-				return f.isDirectory() || f.getName().toLowerCase().endsWith(repository.getMaskFileExtension());
-			}
-
-			@Override
-			public String getDescription() {
-				return "Segmentation mask (*" + repository.getMaskFileExtension() + ")";
-			}
-		});
-		fileChooser.setDialogTitle("Choose segmentation file");
-
-		int returnValue = fileChooser.showDialog(null, "OK");
-
-		preferences.putInt("x", fileChooser.getX());
-		preferences.putInt("y", fileChooser.getY());
-		preferences.putInt("w", fileChooser.getWidth());
-		preferences.putInt("h", fileChooser.getHeight());
-
-		if (returnValue == JFileChooser.APPROVE_OPTION) {
-			preferences.put("path", fileChooser.getSelectedFile().getAbsolutePath());
-			File file = fileChooser.getSelectedFile();
-			return file;
-		} else {
-			return null;
-		}
+		File f = PluginHelper.fileChooser(preferences, rep, df);
+		return f;
 	}
 
 	/**
@@ -658,49 +602,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 	 * @return the file
 	 */
 	File displayTiffExport() {
-		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setMultiSelectionEnabled(false);
-		fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-
-		XMLPreferences preferences = getPreferences().node("tiffexport");
-		String path = preferences.get("path", "");
-		fileChooser.setCurrentDirectory(new File(path));
-
-		int x = preferences.getInt("x", 0);
-		int y = preferences.getInt("y", 0);
-		int w = preferences.getInt("w", 400);
-		int h = preferences.getInt("h", 400);
-
-		fileChooser.setLocation(x, y);
-		fileChooser.setPreferredSize(new Dimension(w, h));
-		fileChooser.setAcceptAllFileFilterUsed(true);
-		fileChooser.setFileFilter(new FileFilter() {
-			@Override
-			public boolean accept(File f) {
-				return f.isDirectory() || f.getName().toLowerCase().endsWith(".tiff") || f.getName().toLowerCase().endsWith(".tif");
-			}
-
-			@Override
-			public String getDescription() {
-				return "TIFF files (*.tiff, *.tif)";
-			}
-		});
-		fileChooser.setDialogTitle("Choose TIFF file");
-
-		int returnValue = fileChooser.showDialog(null, "OK");
-
-		preferences.putInt("x", fileChooser.getX());
-		preferences.putInt("y", fileChooser.getY());
-		preferences.putInt("w", fileChooser.getWidth());
-		preferences.putInt("h", fileChooser.getHeight());
-
-		if (returnValue == JFileChooser.APPROVE_OPTION) {
-			preferences.put("path", fileChooser.getSelectedFile().getAbsolutePath());
-			File file = fileChooser.getSelectedFile();
-			return file;
-		} else {
-			return null;
-		}
+		return PluginHelper.fileChooser(".tif", "TIFF files (*.tif)", getPreferences().node("tiffexport"), "Choose TIFF file");
 	}
 
 	int getBackupOpacity() {
@@ -890,6 +792,14 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 	@Override
 	public Iterator<MaskLayer> iterator() {
 		return layers.iterator();
+	}
+
+	public void loadForCurrentSequence(File f, MaskPersistence rep) throws PersistenceException {
+		MaskStack s = rep.loadMaskStack(f);
+		s.checkAfterLoad((float) slOpacity.getValue() / 100f, getCurrentSequence().getFirstImage());
+		removeBackupObject(getCurrentSequence());
+		addBackupObject(s);
+		setStack(s);
 	}
 
 	/*
