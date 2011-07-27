@@ -244,7 +244,7 @@ class MaskLayer extends JPanel implements ActionListener, ItemListener, MouseLis
 				}
 			}
 			if (b == btColor) {
-				btColor.setBackground(JColorChooser.showDialog(editor.getFrame(), "Choose current mask color", btColor.getBackground()));
+				btColor.setBackground(JColorChooser.showDialog(editor.getFrame().getFrame(), "Choose current mask color", btColor.getBackground()));
 				mask.setColor(btColor.getBackground());
 				editor.getCurrentSequence().painterChanged(null);
 			}

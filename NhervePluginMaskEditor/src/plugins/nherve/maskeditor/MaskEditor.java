@@ -20,10 +20,8 @@ package plugins.nherve.maskeditor;
 
 import icy.file.Saver;
 import icy.gui.component.ComponentUtil;
-import icy.gui.frame.IcyFrame;
 import icy.gui.main.MainEvent;
 import icy.gui.util.GuiUtil;
-import icy.gui.util.WindowPositionSaver;
 import icy.image.IcyBufferedImage;
 import icy.main.Icy;
 import icy.plugin.PluginDescriptor;
@@ -40,10 +38,8 @@ import icy.swimmingPool.SwimmingPoolListener;
 import icy.system.thread.ThreadUtil;
 
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.Shape;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -134,15 +130,6 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 
 	private static DataFlavor localFlavor = null;
 
-	/** The Constant PLUGIN_NAME. */
-	final static String PLUGIN_NAME = "Mask Editor";
-
-	/** The Constant PLUGIN_VERSION. */
-	private final static String PLUGIN_VERSION = "1.1.0";
-
-	/** The Constant FULL_PLUGIN_NAME. */
-	private final static String FULL_PLUGIN_NAME = PLUGIN_NAME + " V" + PLUGIN_VERSION;
-
 	/** The Constant SHAPE_SQUARE. */
 	private final static String SHAPE_SQUARE = "Square";
 
@@ -158,10 +145,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 	/** The Constant NB_COLOR_CYCLE. */
 	public final static int NB_COLOR_CYCLE = 3;
 
-	private static String HELP = "<html>" + "<p align=\"center\"><b>" + FULL_PLUGIN_NAME + "</b></p>" + "<p align=\"center\"><b>" + NherveToolbox.DEV_NAME_HTML + "</b></p>" + "<p align=\"center\"><a href=\"http://www.herve.name/pmwiki.php/Main/MaskEditor\">Online help is available</a></p>" + "<p align=\"center\"><b>" + NherveToolbox.COPYRIGHT_HTML + "</b></p>" + "<hr/>" + "<p>On each opened sequence, you can use the following keys : </p>" + "<table>" + "<tr><td align=\"center\"><b>D</b></td><td>activate / deactivate the drawing tool</td></tr>" + "<tr><td align=\"center\"><b>Click</b></td><td>add to current mask</td></tr>" + "<tr><td align=\"center\"><b>SHIFT + Click</b></td><td>substract from current mask</td></tr>" + "<tr><td align=\"center\"><b>CTRL + Click</b></td><td>fill hole in current mask</td></tr>" + "<tr><td></td></tr>" + "<tr><td align=\"center\"><b>W</b></td><td>show / hide the active mask</td></tr>" + "<tr><td align=\"center\"><b>CTRL + [0..9]</b></td><td>show / hide the corresponding mask</td></tr>" + "<tr><td align=\"center\"><b>X</b></td><td>show / hide all masks</i> tool</td></tr>" + "<tr><td align=\"center\"><b>C</b></td><td>decrease the draw tool size</td></tr>" + "<tr><td align=\"center\"><b>CTRL + C</b></td><td>slightly decrease the draw tool size</td></tr>" + "<tr><td align=\"center\"><b>V</b></td><td>increase the draw tool size</td></tr>" + "<tr><td align=\"center\"><b>CTRL + V</b></td><td>slightly increase the draw tool size</td></tr>" + "</table>" + "<hr/>" + "<p>" + PLUGIN_NAME + NherveToolbox.LICENCE_HTML + "</p>" + "<p>" + NherveToolbox.LICENCE_HTMLLINK + "</p>" + "</html>";
-
-	/** The Constant serialVersionUID. */
-	private static final long serialVersionUID = -1433844770818397476L;
+	private static String HELP = "<html>" + "<p align=\"center\"><b>" + HelpWindow.TAG_FULL_PLUGIN_NAME + "</b></p>" + "<p align=\"center\"><b>" + NherveToolbox.DEV_NAME_HTML + "</b></p>" + "<p align=\"center\"><a href=\"http://www.herve.name/pmwiki.php/Main/MaskEditor\">Online help is available</a></p>" + "<p align=\"center\"><b>" + NherveToolbox.COPYRIGHT_HTML + "</b></p>" + "<hr/>" + "<p>On each opened sequence, you can use the following keys : </p>" + "<table>" + "<tr><td align=\"center\"><b>D</b></td><td>activate / deactivate the drawing tool</td></tr>" + "<tr><td align=\"center\"><b>Click</b></td><td>add to current mask</td></tr>" + "<tr><td align=\"center\"><b>SHIFT + Click</b></td><td>substract from current mask</td></tr>" + "<tr><td align=\"center\"><b>CTRL + Click</b></td><td>fill hole in current mask</td></tr>" + "<tr><td></td></tr>" + "<tr><td align=\"center\"><b>W</b></td><td>show / hide the active mask</td></tr>" + "<tr><td align=\"center\"><b>CTRL + [0..9]</b></td><td>show / hide the corresponding mask</td></tr>" + "<tr><td align=\"center\"><b>X</b></td><td>show / hide all masks</i> tool</td></tr>" + "<tr><td align=\"center\"><b>C</b></td><td>decrease the draw tool size</td></tr>" + "<tr><td align=\"center\"><b>CTRL + C</b></td><td>slightly decrease the draw tool size</td></tr>" + "<tr><td align=\"center\"><b>V</b></td><td>increase the draw tool size</td></tr>" + "<tr><td align=\"center\"><b>CTRL + V</b></td><td>slightly increase the draw tool size</td></tr>" + "</table>" + "<hr/>" + "<p>" + HelpWindow.TAG_PLUGIN_NAME + NherveToolbox.LICENCE_HTML + "</p>" + "<p>" + NherveToolbox.LICENCE_HTMLLINK + "</p>" + "</html>";
 
 	/**
 	 * Gets the running instance.
@@ -197,9 +181,6 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 			}
 		});
 	}
-
-	/** The frame. */
-	private IcyFrame frame;
 
 	/** The cbx cursor shape. */
 	private JComboBox cbxCursorShape;
@@ -440,7 +421,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 			}
 
 			if (b == btHelp) {
-				new HelpWindow(PLUGIN_NAME, HELP, 400, 600, frame);
+				openHelpWindow(HELP, 400, 600);
 				return;
 			}
 
@@ -621,9 +602,9 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 		return cbViewBgdBox;
 	}
 
-	public Container getFrame() {
-		return frame.getFrame();
-	}
+//	public Container getFrame() {
+//		return frame.getFrame();
+//	}
 
 	public float getGlobalOpacity() {
 		return slOpacity.getValue() / 100f;
@@ -986,10 +967,10 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 	public void sequenceHasChangedAfterSettingPainter() {
 		if (hasCurrentSequence()) {
 			Sequence currentSequence = getCurrentSequence();
-			frame.setTitle(PLUGIN_NAME + " - " + currentSequence.getName());
+			setTitle(getName() + " - " + currentSequence.getName());
 			setStack(getBackupObject());
 		} else {
-			frame.setTitle(PLUGIN_NAME);
+			setTitle(getName());
 			setStack(null);
 		}
 		refreshInterface();
@@ -1070,23 +1051,15 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see plugins.nherve.toolbox.plugin.SingletonPlugin#startInterface()
-	 */
 	@Override
-	public void startInterface() {
+	public Dimension getDefaultFrameDimension() {
+		return new Dimension(580, 800);
+	}
+	
+	@Override
+	public void fillInterface(JPanel mainPanel) {
 		SwimmingPool sp = Icy.getMainInterface().getSwimmingPool();
 		sp.addListener(this);
-
-		JPanel mainPanel = GuiUtil.generatePanel();
-		frame = GuiUtil.generateTitleFrame(FULL_PLUGIN_NAME, mainPanel, new Dimension(580, 100), true, true, true, true);
-		addIcyFrame(frame);
-		XMLPreferences preferences = getPreferences();
-		new WindowPositionSaver(frame, preferences.absolutePath(), new Point(0, 0), new Dimension(580, 800));
-
-		// mainPanel.setLayout(new BorderLayout());
 
 		// LOAD / SAVE TOOLS
 		btGetSPGlobal = new JButton(NherveToolbox.fromSwimingPoolIcon);
@@ -1227,13 +1200,6 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 		mll.setTransferHandler(new BackgroundPanelTransferHandler());
 
 		mainPanel.add(mll);
-
-		// FRAME STUFF
-		frame.addFrameListener(this);
-		frame.setVisible(true);
-		frame.pack();
-
-		frame.requestFocus();
 	}
 
 	/*

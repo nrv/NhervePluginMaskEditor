@@ -22,10 +22,6 @@ import plugins.nherve.toolbox.image.segmentation.SegmentationComparison;
  * @author Nicolas HERVE - nicolas.herve@pasteur.fr
  */
 class SegmentCompareWindow extends IcyFrame implements ActionListener {
-
-	/** The Constant serialVersionUID. */
-	private static final long serialVersionUID = -7316859083701187977L;
-
 	/** The cb1. */
 	private JComboBox cb1;
 
@@ -42,7 +38,7 @@ class SegmentCompareWindow extends IcyFrame implements ActionListener {
 	 *            the stack
 	 */
 	public SegmentCompareWindow(MaskStack stack) {
-		super(MaskEditor.PLUGIN_NAME, false, true, false, false);
+		super(MaskEditor.getRunningInstance(false).getName(), false, true, false, false);
 
 		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.PAGE_AXIS));
 
