@@ -174,6 +174,8 @@ class MaskEditorPainter implements Painter, MouseWheelListener {
 					editor.logError(e1.getClass().getName() + " : " + e1.getMessage());
 				}
 
+				e.consume();
+				
 				getSequence().painterChanged(null);
 			}
 		}
@@ -199,7 +201,8 @@ class MaskEditorPainter implements Painter, MouseWheelListener {
 	 */
 	@Override
 	public void mousePressed(MouseEvent e, Point2D imagePoint, IcyCanvas canvas) {
-
+		// TODO due to new canvas2D behaviour
+		e.consume();
 	}
 
 	/*
