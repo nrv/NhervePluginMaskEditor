@@ -438,6 +438,9 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 			if (b == btSaveFullImage) {
 				File f = displayTiffExport();
 				if (f != null) {
+					if (!f.getAbsolutePath().toUpperCase().endsWith(".TIF") && !f.getAbsolutePath().toUpperCase().endsWith(".TIFF")) {
+						f = new File(f.getAbsolutePath() + ".tif");
+					}
 					try {
 						Sequence s = getCurrentSequence();
 						BufferedImage localCache = new BufferedImage(s.getWidth(), s.getHeight(), BufferedImage.TYPE_INT_ARGB);
@@ -488,6 +491,9 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 					File df = rep.getMaskFileFor(new File(d));
 					File f = displaySegmentationExport(rep, df);
 					if (f != null) {
+						if (!f.getAbsolutePath().toUpperCase().endsWith(rep.getMaskFileExtension().toUpperCase())) {
+							f = new File(f.getAbsolutePath() + rep.getMaskFileExtension());
+						}
 						rep.save(getStack(), f);
 					}
 				} catch (PersistenceException e1) {
