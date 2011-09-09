@@ -129,6 +129,8 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 	}
 
 	private static DataFlavor localFlavor = null;
+	
+	private final static String VERSION = "1.2.0.2";
 
 	/** The Constant SHAPE_SQUARE. */
 	private final static String SHAPE_SQUARE = "Square";
@@ -592,6 +594,152 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 		return PluginHelper.fileChooser(".tif", "TIFF files (*.tif)", getPreferences().node("tiffexport"), "Choose TIFF file");
 	}
 
+	@Override
+	public void fillInterface(JPanel mainPanel) {
+		SwimmingPool sp = Icy.getMainInterface().getSwimmingPool();
+		sp.addListener(this);
+
+		// LOAD / SAVE TOOLS
+		btGetSPGlobal = new JButton(NherveToolbox.fromSwimingPoolIcon);
+		btGetSPGlobal.setEnabled(isSegmentationInPool());
+		btGetSPGlobal.setToolTipText("Get the full stack from the swimming pool");
+		btGetSPGlobal.addActionListener(this);
+		btLoad = new JButton("Load");
+		btLoad.addActionListener(this);
+		btSave = new JButton("Save");
+		btSave.addActionListener(this);
+		btLoad.setEnabled(false);
+		btSave.setEnabled(false);
+		btSaveFullImage = new JButton("Export");
+		btSaveFullImage.setToolTipText("Export current display");
+		btSaveFullImage.addActionListener(this);
+		btSendSPGlobal = new JButton(NherveToolbox.toSwimingPoolIcon);
+		btSendSPGlobal.setToolTipText("Send the full stack to the swimming pool");
+		btSendSPGlobal.addActionListener(this);
+		JPanel lsTool = GuiUtil.createLineBoxPanel(new Component[] { Box.createHorizontalGlue(), btGetSPGlobal, Box.createHorizontalGlue(), btLoad, Box.createHorizontalGlue(), btSave, Box.createHorizontalGlue(), btSaveFullImage, Box.createHorizontalGlue(), btSendSPGlobal, Box.createHorizontalGlue() });
+		lsTool.setBorder(new TitledBorder("Load & Save tools"));
+		mainPanel.add(lsTool);
+
+		// DRAWING TOOLS
+		cbxCursorShape = new JComboBox();
+		cbxCursorShape.addItem(SHAPE_CIRCLE);
+		cbxCursorShape.addItem(SHAPE_SQUARE);
+		cbxCursorShape.addItem(SHAPE_HORIZONTAL_LINE);
+		cbxCursorShape.addItem(SHAPE_VERTICAL_LINE);
+		ComponentUtil.setFixedSize(cbxCursorShape, new Dimension(125, 25));
+		cbDrawEnabled = new JCheckBox("Draw enabled");
+		cbDrawEnabled.addItemListener(this);
+		btHelp = new JButton(NherveToolbox.questionIcon);
+		btHelp.addActionListener(this);
+		JPanel p1 = GuiUtil.createLineBoxPanel(new Component[] { new JLabel("Shape  "), cbxCursorShape, Box.createHorizontalGlue(), cbDrawEnabled, Box.createHorizontalGlue(), btHelp });
+
+		slCursorSize = new JSlider(JSlider.HORIZONTAL, 1, 100, 11);
+		slCursorSize.addChangeListener(this);
+		slCursorSize.setMajorTickSpacing(10);
+		slCursorSize.setMinorTickSpacing(2);
+		slCursorSize.setPaintTicks(true);
+		cbxCursorShape.setEnabled(false);
+		slCursorSize.setEnabled(false);
+		JPanel p2 = GuiUtil.createLineBoxPanel(new JLabel("Size  "), slCursorSize);
+
+		JPanel tool = GuiUtil.createPageBoxPanel(p1, p2);
+		tool.setBorder(new TitledBorder("Drawing tools"));
+		mainPanel.add(tool);
+
+		// DISPLAY TOOLS
+		cbOnlyContours = new JCheckBox("Contours");
+		cbOnlyContours.setSelected(false);
+		cbOnlyContours.addItemListener(this);
+		cbViewBgdBox = new JCheckBox("Image");
+		cbViewBgdBox.setSelected(true);
+		cbViewBgdBox.addItemListener(this);
+		cbBlackWhite = new JCheckBox("B / W");
+		cbBlackWhite.setSelected(true);
+		cbBlackWhite.addItemListener(this);
+		btRealColors = new JButton("Real colors");
+		btRealColors.addActionListener(this);
+		btArtificialColors = new JButton("Artificial colors");
+		btArtificialColors.addActionListener(this);
+		JPanel p3 = GuiUtil.createLineBoxPanel(new Component[] { cbOnlyContours, Box.createHorizontalGlue(), cbViewBgdBox, Box.createHorizontalGlue(), cbBlackWhite, Box.createHorizontalGlue(), btRealColors, Box.createHorizontalGlue(), btArtificialColors });
+
+		backupOpacity = 50;
+		slOpacity = new JSlider(JSlider.HORIZONTAL, 0, 100, backupOpacity);
+		slOpacity.addChangeListener(this);
+		slOpacity.setMajorTickSpacing(10);
+		slOpacity.setMinorTickSpacing(2);
+		slOpacity.setPaintTicks(true);
+		slOpacity.setEnabled(false);
+		JPanel p4 = GuiUtil.createLineBoxPanel(new JLabel("Opacity  "), slOpacity);
+
+		JPanel dspTool = GuiUtil.createPageBoxPanel(p3, p4);
+		dspTool.setBorder(new TitledBorder("Display tools"));
+		mainPanel.add(dspTool);
+
+		// MASKS LIST
+		mll = new JPanel();
+
+		stack = null;
+		layers = new ArrayList<MaskLayer>();
+
+		mll.setOpaque(false);
+		mll.setLayout(new BoxLayout(mll, BoxLayout.PAGE_AXIS));
+		mll.setBorder(new TitledBorder("Masks list"));
+
+		btAddMaskSP = new JButton("From SP");
+		btAddMaskSP.addActionListener(this);
+		btAddMaskSP.setEnabled(isMaskInPool());
+
+		btFromROI = new JButton("From ROI");
+		btFromROI.addActionListener(this);
+		btFromROI.setEnabled(false);
+
+		btDuplicateMask = new JButton("Copy mask");
+		btDuplicateMask.addActionListener(this);
+		btDuplicateMask.setEnabled(false);
+
+		btAddMask = new JButton("New mask");
+		btAddMask.addActionListener(this);
+		btAddMask.setEnabled(false);
+
+		btCompare = new JButton("Compare");
+		btCompare.addActionListener(this);
+
+		JPanel btp = GuiUtil.createLineBoxPanel(new Component[] { Box.createHorizontalGlue(), btAddMaskSP, Box.createHorizontalGlue(), btFromROI, Box.createHorizontalGlue(), btDuplicateMask, Box.createHorizontalGlue(), btAddMask, Box.createHorizontalGlue(), btCompare, Box.createHorizontalGlue() });
+		mll.add(btp);
+
+		btErode = new JButton("Erode");
+		btErode.addActionListener(this);
+
+		btDilate = new JButton("Dilate");
+		btDilate.addActionListener(this);
+
+		btInvert = new JButton("Invert");
+		btInvert.addActionListener(this);
+
+		btFillHoles = new JButton("Fill holes");
+		btFillHoles.addActionListener(this);
+
+		btFilterSize = new JButton("Filter");
+		btFilterSize.addActionListener(this);
+
+		tfFilterSize = new JTextField("1");
+		ComponentUtil.setFixedSize(tfFilterSize, new Dimension(50, 25));
+
+		JPanel morpho = GuiUtil.createLineBoxPanel(new Component[] { btErode, Box.createHorizontalGlue(), btDilate, Box.createHorizontalGlue(), btInvert, Box.createHorizontalGlue(), btFillHoles, Box.createHorizontalGlue(), btFilterSize, Box.createHorizontalGlue(), tfFilterSize });
+		mll.add(morpho);
+
+		mlp = new JPanel();
+		mlp.setLayout(new BoxLayout(mlp, BoxLayout.PAGE_AXIS));
+		// mlp.setMinimumSize(new Dimension(0, 300));
+
+		scroll = new JScrollPane(mlp);
+		mll.add(scroll);
+
+		mll.setTransferHandler(new BackgroundPanelTransferHandler());
+
+		mainPanel.add(mll);
+	}
+
 	int getBackupOpacity() {
 		return backupOpacity;
 	}
@@ -604,13 +752,23 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 		return cbDrawEnabled;
 	}
 
+//	public Container getFrame() {
+//		return frame.getFrame();
+//	}
+
 	JCheckBox getCbViewBgdBox() {
 		return cbViewBgdBox;
 	}
 
-//	public Container getFrame() {
-//		return frame.getFrame();
-//	}
+	@Override
+	public Dimension getDefaultFrameDimension() {
+		return new Dimension(580, 800);
+	}
+
+	@Override
+	public String getDefaultVersion() {
+		return VERSION;
+	}
 
 	public float getGlobalOpacity() {
 		return slOpacity.getValue() / 100f;
@@ -1029,7 +1187,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 			}
 		}
 	}
-
+	
 	/**
 	 * Sets the stack.
 	 * 
@@ -1055,157 +1213,6 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 				}
 			});
 		}
-	}
-
-	@Override
-	public Dimension getDefaultFrameDimension() {
-		return new Dimension(580, 800);
-	}
-	
-	@Override
-	public void fillInterface(JPanel mainPanel) {
-		SwimmingPool sp = Icy.getMainInterface().getSwimmingPool();
-		sp.addListener(this);
-
-		// LOAD / SAVE TOOLS
-		btGetSPGlobal = new JButton(NherveToolbox.fromSwimingPoolIcon);
-		btGetSPGlobal.setEnabled(isSegmentationInPool());
-		btGetSPGlobal.setToolTipText("Get the full stack from the swimming pool");
-		btGetSPGlobal.addActionListener(this);
-		btLoad = new JButton("Load");
-		btLoad.addActionListener(this);
-		btSave = new JButton("Save");
-		btSave.addActionListener(this);
-		btLoad.setEnabled(false);
-		btSave.setEnabled(false);
-		btSaveFullImage = new JButton("Export");
-		btSaveFullImage.setToolTipText("Export current display");
-		btSaveFullImage.addActionListener(this);
-		btSendSPGlobal = new JButton(NherveToolbox.toSwimingPoolIcon);
-		btSendSPGlobal.setToolTipText("Send the full stack to the swimming pool");
-		btSendSPGlobal.addActionListener(this);
-		JPanel lsTool = GuiUtil.createLineBoxPanel(new Component[] { Box.createHorizontalGlue(), btGetSPGlobal, Box.createHorizontalGlue(), btLoad, Box.createHorizontalGlue(), btSave, Box.createHorizontalGlue(), btSaveFullImage, Box.createHorizontalGlue(), btSendSPGlobal, Box.createHorizontalGlue() });
-		lsTool.setBorder(new TitledBorder("Load & Save tools"));
-		mainPanel.add(lsTool);
-
-		// DRAWING TOOLS
-		cbxCursorShape = new JComboBox();
-		cbxCursorShape.addItem(SHAPE_CIRCLE);
-		cbxCursorShape.addItem(SHAPE_SQUARE);
-		cbxCursorShape.addItem(SHAPE_HORIZONTAL_LINE);
-		cbxCursorShape.addItem(SHAPE_VERTICAL_LINE);
-		ComponentUtil.setFixedSize(cbxCursorShape, new Dimension(125, 25));
-		cbDrawEnabled = new JCheckBox("Draw enabled");
-		cbDrawEnabled.addItemListener(this);
-		btHelp = new JButton(NherveToolbox.questionIcon);
-		btHelp.addActionListener(this);
-		JPanel p1 = GuiUtil.createLineBoxPanel(new Component[] { new JLabel("Shape  "), cbxCursorShape, Box.createHorizontalGlue(), cbDrawEnabled, Box.createHorizontalGlue(), btHelp });
-
-		slCursorSize = new JSlider(JSlider.HORIZONTAL, 1, 100, 11);
-		slCursorSize.addChangeListener(this);
-		slCursorSize.setMajorTickSpacing(10);
-		slCursorSize.setMinorTickSpacing(2);
-		slCursorSize.setPaintTicks(true);
-		cbxCursorShape.setEnabled(false);
-		slCursorSize.setEnabled(false);
-		JPanel p2 = GuiUtil.createLineBoxPanel(new JLabel("Size  "), slCursorSize);
-
-		JPanel tool = GuiUtil.createPageBoxPanel(p1, p2);
-		tool.setBorder(new TitledBorder("Drawing tools"));
-		mainPanel.add(tool);
-
-		// DISPLAY TOOLS
-		cbOnlyContours = new JCheckBox("Contours");
-		cbOnlyContours.setSelected(false);
-		cbOnlyContours.addItemListener(this);
-		cbViewBgdBox = new JCheckBox("Image");
-		cbViewBgdBox.setSelected(true);
-		cbViewBgdBox.addItemListener(this);
-		cbBlackWhite = new JCheckBox("B / W");
-		cbBlackWhite.setSelected(true);
-		cbBlackWhite.addItemListener(this);
-		btRealColors = new JButton("Real colors");
-		btRealColors.addActionListener(this);
-		btArtificialColors = new JButton("Artificial colors");
-		btArtificialColors.addActionListener(this);
-		JPanel p3 = GuiUtil.createLineBoxPanel(new Component[] { cbOnlyContours, Box.createHorizontalGlue(), cbViewBgdBox, Box.createHorizontalGlue(), cbBlackWhite, Box.createHorizontalGlue(), btRealColors, Box.createHorizontalGlue(), btArtificialColors });
-
-		backupOpacity = 50;
-		slOpacity = new JSlider(JSlider.HORIZONTAL, 0, 100, backupOpacity);
-		slOpacity.addChangeListener(this);
-		slOpacity.setMajorTickSpacing(10);
-		slOpacity.setMinorTickSpacing(2);
-		slOpacity.setPaintTicks(true);
-		slOpacity.setEnabled(false);
-		JPanel p4 = GuiUtil.createLineBoxPanel(new JLabel("Opacity  "), slOpacity);
-
-		JPanel dspTool = GuiUtil.createPageBoxPanel(p3, p4);
-		dspTool.setBorder(new TitledBorder("Display tools"));
-		mainPanel.add(dspTool);
-
-		// MASKS LIST
-		mll = new JPanel();
-
-		stack = null;
-		layers = new ArrayList<MaskLayer>();
-
-		mll.setOpaque(false);
-		mll.setLayout(new BoxLayout(mll, BoxLayout.PAGE_AXIS));
-		mll.setBorder(new TitledBorder("Masks list"));
-
-		btAddMaskSP = new JButton("From SP");
-		btAddMaskSP.addActionListener(this);
-		btAddMaskSP.setEnabled(isMaskInPool());
-
-		btFromROI = new JButton("From ROI");
-		btFromROI.addActionListener(this);
-		btFromROI.setEnabled(false);
-
-		btDuplicateMask = new JButton("Copy mask");
-		btDuplicateMask.addActionListener(this);
-		btDuplicateMask.setEnabled(false);
-
-		btAddMask = new JButton("New mask");
-		btAddMask.addActionListener(this);
-		btAddMask.setEnabled(false);
-
-		btCompare = new JButton("Compare");
-		btCompare.addActionListener(this);
-
-		JPanel btp = GuiUtil.createLineBoxPanel(new Component[] { Box.createHorizontalGlue(), btAddMaskSP, Box.createHorizontalGlue(), btFromROI, Box.createHorizontalGlue(), btDuplicateMask, Box.createHorizontalGlue(), btAddMask, Box.createHorizontalGlue(), btCompare, Box.createHorizontalGlue() });
-		mll.add(btp);
-
-		btErode = new JButton("Erode");
-		btErode.addActionListener(this);
-
-		btDilate = new JButton("Dilate");
-		btDilate.addActionListener(this);
-
-		btInvert = new JButton("Invert");
-		btInvert.addActionListener(this);
-
-		btFillHoles = new JButton("Fill holes");
-		btFillHoles.addActionListener(this);
-
-		btFilterSize = new JButton("Filter");
-		btFilterSize.addActionListener(this);
-
-		tfFilterSize = new JTextField("1");
-		ComponentUtil.setFixedSize(tfFilterSize, new Dimension(50, 25));
-
-		JPanel morpho = GuiUtil.createLineBoxPanel(new Component[] { btErode, Box.createHorizontalGlue(), btDilate, Box.createHorizontalGlue(), btInvert, Box.createHorizontalGlue(), btFillHoles, Box.createHorizontalGlue(), btFilterSize, Box.createHorizontalGlue(), tfFilterSize });
-		mll.add(morpho);
-
-		mlp = new JPanel();
-		mlp.setLayout(new BoxLayout(mlp, BoxLayout.PAGE_AXIS));
-		// mlp.setMinimumSize(new Dimension(0, 300));
-
-		scroll = new JScrollPane(mlp);
-		mll.add(scroll);
-
-		mll.setTransferHandler(new BackgroundPanelTransferHandler());
-
-		mainPanel.add(mll);
 	}
 
 	/*
@@ -1311,7 +1318,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 			}
 		}
 	}
-
+	
 	/**
 	 * Switch opacity off.
 	 * 
