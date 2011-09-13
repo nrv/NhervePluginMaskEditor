@@ -1,5 +1,6 @@
 package plugins.nherve.maskeditor;
 
+import icy.file.Loader;
 import icy.gui.component.ComponentUtil;
 import icy.gui.component.ImageComponent;
 import icy.image.IcyBufferedImage;
@@ -8,6 +9,7 @@ import icy.roi.ROI2D;
 import icy.roi.ROI2DArea;
 import icy.sequence.Sequence;
 import icy.swimmingPool.SwimmingObject;
+import icy.type.TypeUtil;
 
 import java.awt.Dimension;
 import java.awt.datatransfer.DataFlavor;
@@ -40,7 +42,10 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.TransferHandler;
 
+import loci.formats.FormatException;
+
 import plugins.nherve.toolbox.NherveToolbox;
+import plugins.nherve.toolbox.image.BinaryIcyBufferedImage;
 import plugins.nherve.toolbox.image.mask.Mask;
 import plugins.nherve.toolbox.image.mask.MaskException;
 import plugins.nherve.toolbox.image.toolboxes.ColorSpaceTools;
@@ -169,6 +174,8 @@ class MaskLayer extends JPanel implements ActionListener, ItemListener, MouseLis
 
 	/** The bt save. */
 	private JButton btSave;
+	
+	private JButton btLoad;
 
 	/** The bt active. */
 	private JRadioButton btActive;
@@ -279,13 +286,30 @@ class MaskLayer extends JPanel implements ActionListener, ItemListener, MouseLis
 				btPop.getComponentPopupMenu().setVisible(false);
 			}
 			if (b == btSave) {
-				File f = editor.displayTiffExport();
+				File f = editor.displayTiffChooser();
 				if (f != null) {
 					try {
 						SomeImageTools.save(mask.getBinaryData(), f, ColorSpaceTools.NB_COLOR_CHANNELS);
 					} catch (IOException e1) {
 						e1.printStackTrace();
 					}
+				}
+				btPop.getComponentPopupMenu().setVisible(false);
+			}
+			if (b == btLoad) {
+				File f = editor.displayTiffChooser();
+				if (f != null) {
+					try {
+						IcyBufferedImage im = Loader.loadImage(f);
+						im = im.convertToType(TypeUtil.TYPE_DOUBLE, false, false);
+						BinaryIcyBufferedImage bin = SomeImageTools.toMask(im);
+						mask.setBinaryData(bin);
+					} catch (FormatException e1) {
+						e1.printStackTrace();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+					editor.getCurrentSequence().painterChanged(null);
 				}
 				btPop.getComponentPopupMenu().setVisible(false);
 			}
@@ -620,6 +644,11 @@ class MaskLayer extends JPanel implements ActionListener, ItemListener, MouseLis
 		btSave.setToolTipText("Export mask as TIFF");
 		btSave.addActionListener(this);
 		pop.add(btSave);
+		
+		btLoad = new JButton(NherveToolbox.loadIcon);
+		btLoad.setToolTipText("Import mask from TIFF");
+		btLoad.addActionListener(this);
+		pop.add(btLoad);
 
 		btAsROI = new JButton(NherveToolbox.asroiIcon);
 		btAsROI.setToolTipText("Export mask as ROI");

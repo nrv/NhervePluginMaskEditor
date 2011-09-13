@@ -130,7 +130,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 
 	private static DataFlavor localFlavor = null;
 	
-	private final static String VERSION = "1.2.0.2";
+	private final static String VERSION = "1.2.1.0";
 
 	/** The Constant SHAPE_SQUARE. */
 	private final static String SHAPE_SQUARE = "Square";
@@ -438,7 +438,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 			}
 
 			if (b == btSaveFullImage) {
-				File f = displayTiffExport();
+				File f = displayTiffChooser();
 				if (f != null) {
 					if (!f.getAbsolutePath().toUpperCase().endsWith(".TIF") && !f.getAbsolutePath().toUpperCase().endsWith(".TIFF")) {
 						f = new File(f.getAbsolutePath() + ".tif");
@@ -590,8 +590,13 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 	 * 
 	 * @return the file
 	 */
-	File displayTiffExport() {
-		return PluginHelper.fileChooser(".tif", "TIFF files (*.tif)", getPreferences().node("tiffexport"), "Choose TIFF file");
+	File displayTiffChooser() {
+		File f = PluginHelper.fileChooser("TIFF files (*.tif, *.tiff)", getPreferences().node("tiffexport"), "Choose TIFF file", ".tif", ".tiff");
+		
+		if ((f != null) && !f.getAbsolutePath().toUpperCase().endsWith(".TIF") && !f.getAbsolutePath().toUpperCase().endsWith(".TIFF")) {
+			f = new File(f.getAbsolutePath() + ".tif");
+		}
+		return f;
 	}
 
 	@Override
