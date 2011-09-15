@@ -12,6 +12,7 @@
     </manifest>
     <selectedElements exportClassFiles="true" exportJavaFiles="true" exportOutputFolder="false">
         <file path="/NhervePluginMaskEditor/COPYING"/>
+        <file path="/NhervePluginMaskEditor/Manifest.MF"/>
         <javaElement handleIdentifier="=NhervePluginMaskEditor/src"/>
     </selectedElements>
 </jardesc>
