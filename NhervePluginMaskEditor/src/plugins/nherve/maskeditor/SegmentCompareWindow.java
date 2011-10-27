@@ -12,6 +12,7 @@ import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
+import plugins.nherve.toolbox.Algorithm;
 import plugins.nherve.toolbox.image.mask.Mask;
 import plugins.nherve.toolbox.image.mask.MaskStack;
 import plugins.nherve.toolbox.image.segmentation.SegmentationComparison;
@@ -82,17 +83,17 @@ class SegmentCompareWindow extends IcyFrame implements ActionListener {
 
 		DecimalFormat df = new DecimalFormat("0.0000");
 
-		System.out.println("Score between [" + m1.toString() + "] and [" + m2.toString() + "] : ");
+		Algorithm.out("Score between [" + m1.toString() + "] and [" + m2.toString() + "] : ");
 		double sc1 = SegmentationComparison.score1(m1, m2);
 		double sc2 = SegmentationComparison.score2(m1, m2);
 		double sc3 = SegmentationComparison.score3(m1, m2);
 		double sc4 = SegmentationComparison.score4(m1, m2);
 		double nhd = SegmentationComparison.nhd(m1, m2);
-		System.out.println(" - s1  : " + df.format(sc1) + "(" + df.format(sc1 / m1.getSurface()) + ")");
-		System.out.println(" - s2  : " + df.format(sc2));
-		System.out.println(" - s3  : " + df.format(sc3));
-		System.out.println(" - s4  : " + df.format(sc4) + "(" + df.format(sc4 / m1.getSurface()) + ")");
-		System.out.println(" - nhd : " + df.format(nhd));
+		Algorithm.out(" - s1  : " + df.format(sc1) + "(" + df.format(sc1 / m1.getSurface()) + ")");
+		Algorithm.out(" - s2  : " + df.format(sc2));
+		Algorithm.out(" - s3  : " + df.format(sc3));
+		Algorithm.out(" - s4  : " + df.format(sc4) + "(" + df.format(sc4 / m1.getSurface()) + ")");
+		Algorithm.out(" - nhd : " + df.format(nhd));
 	}
 }
 

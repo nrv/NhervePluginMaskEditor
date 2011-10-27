@@ -44,6 +44,7 @@ import javax.swing.TransferHandler;
 
 import loci.formats.FormatException;
 
+import plugins.nherve.toolbox.Algorithm;
 import plugins.nherve.toolbox.NherveToolbox;
 import plugins.nherve.toolbox.image.BinaryIcyBufferedImage;
 import plugins.nherve.toolbox.image.mask.Mask;
@@ -282,7 +283,7 @@ class MaskLayer extends JPanel implements ActionListener, ItemListener, MouseLis
 				int nbon = mask.getSurface();
 				double pct = (double) nbon * 100d / (double) (mask.getHeight() * mask.getWidth());
 				DecimalFormat df = new DecimalFormat("0.00");
-				System.out.println("Some info on " + mask + " : surface = " + nbon + " (" + df.format(pct) + " %)");
+				Algorithm.out("Some info on " + mask + " : surface = " + nbon + " (" + df.format(pct) + " %)");
 				btPop.getComponentPopupMenu().setVisible(false);
 			}
 			if (b == btSave) {
