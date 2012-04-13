@@ -1111,11 +1111,11 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 	@Override
 	public void roiAdded(MainEvent event) {
 		ROI roi = (ROI) event.getSource();
-		if (roi.getFirstSequence() == getCurrentSequence()) {
+		//if (roi.getFirstSequence() == getCurrentSequence()) {
 			if (getCurrentSequence().getROI2Ds().size() > 0) {
 				setBtFromROIEnabled(true);
 			}
-		}
+		//}
 	}
 
 	@Override
