@@ -1,5 +1,6 @@
 /*
  * Copyright 2010, 2011 Institut Pasteur.
+ * Copyright 2012, 2013 Nicolas Hervé.
  * 
  * This file is part of Mask Editor, which is an ICY plugin.
  * 
