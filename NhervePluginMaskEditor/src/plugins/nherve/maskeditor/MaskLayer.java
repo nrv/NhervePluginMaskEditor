@@ -1,5 +1,6 @@
 package plugins.nherve.maskeditor;
 
+import icy.common.exception.UnsupportedFormatException;
 import icy.file.Loader;
 import icy.gui.component.ComponentUtil;
 import icy.gui.component.ImageComponent;
@@ -43,7 +44,6 @@ import javax.swing.JTextField;
 import javax.swing.TransferHandler;
 
 import loci.formats.FormatException;
-
 import plugins.nherve.toolbox.Algorithm;
 import plugins.nherve.toolbox.NherveToolbox;
 import plugins.nherve.toolbox.image.BinaryIcyBufferedImage;
@@ -305,9 +305,9 @@ class MaskLayer extends JPanel implements ActionListener, ItemListener, MouseLis
 						im = im.convertToType(TypeUtil.TYPE_DOUBLE, false, false);
 						BinaryIcyBufferedImage bin = SomeImageTools.toMask(im);
 						mask.setBinaryData(bin);
-					} catch (FormatException e1) {
-						e1.printStackTrace();
 					} catch (IOException e1) {
+						e1.printStackTrace();
+					} catch (UnsupportedFormatException e1) {
 						e1.printStackTrace();
 					}
 					editor.getCurrentSequence().painterChanged(null);
