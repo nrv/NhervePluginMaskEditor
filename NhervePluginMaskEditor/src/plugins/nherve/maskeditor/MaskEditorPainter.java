@@ -137,7 +137,7 @@ class MaskEditorPainter implements Painter, MouseWheelListener {
 				try {
 					currentMask.fillHole((int) imagePoint.getX(), (int) imagePoint.getY());
 				} catch (MaskException e1) {
-					editor.logError(e1.getClass().getName() + " : " + e1.getMessage());
+					editor.error(e1.getClass().getName() + " : " + e1.getMessage());
 				}
 				getSequence().painterChanged(null);
 			}
@@ -171,7 +171,7 @@ class MaskEditorPainter implements Painter, MouseWheelListener {
 						currentMask.add(a);
 					}
 				} catch (MaskException e1) {
-					editor.logError(e1.getClass().getName() + " : " + e1.getMessage());
+					editor.error(e1.getClass().getName() + " : " + e1.getMessage());
 				}
 
 				e.consume();

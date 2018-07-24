@@ -326,7 +326,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 					reInitColorMap();
 					stack.createNewMask(MaskStack.MASK_DEFAULT_LABEL, true, colorMap, getGlobalOpacity());
 				} catch (MaskException e1) {
-					logError(e1.getClass().getName() + " : " + e1.getMessage());
+					error(e1.getClass().getName() + " : " + e1.getMessage());
 				}
 			}
 
@@ -339,7 +339,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 					reInitColorMap();
 					stack.copyCurrentMask(colorMap);
 				} catch (MaskException e1) {
-					logError(e1.getClass().getName() + " : " + e1.getMessage());
+					error(e1.getClass().getName() + " : " + e1.getMessage());
 				}
 			}
 
@@ -351,7 +351,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 						m.add(roi);
 					}
 				} catch (MaskException e1) {
-					logError(e1.getClass().getName() + " : " + e1.getMessage());
+					error(e1.getClass().getName() + " : " + e1.getMessage());
 				}
 			}
 
@@ -367,7 +367,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 						}
 					} while (m != null);
 				} catch (MaskException e1) {
-					logError(e1.getClass().getName() + " : " + e1.getMessage());
+					error(e1.getClass().getName() + " : " + e1.getMessage());
 				}
 			}
 
@@ -376,7 +376,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 					Mask m = stack.getActiveMask();
 					m.erode();
 				} catch (MaskException e1) {
-					logError(e1.getClass().getName() + " : " + e1.getMessage());
+					error(e1.getClass().getName() + " : " + e1.getMessage());
 				}
 				getCurrentSequence().painterChanged(null);
 			}
@@ -386,7 +386,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 					Mask m = stack.getActiveMask();
 					m.dilate();
 				} catch (MaskException e1) {
-					logError(e1.getClass().getName() + " : " + e1.getMessage());
+					error(e1.getClass().getName() + " : " + e1.getMessage());
 				}
 				getCurrentSequence().painterChanged(null);
 			}
@@ -396,7 +396,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 					Mask m = stack.getActiveMask();
 					m.invert();
 				} catch (MaskException e1) {
-					logError(e1.getClass().getName() + " : " + e1.getMessage());
+					error(e1.getClass().getName() + " : " + e1.getMessage());
 				}
 				getCurrentSequence().painterChanged(null);
 			}
@@ -406,7 +406,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 					Mask m = stack.getActiveMask();
 					m.fillHoles();
 				} catch (MaskException e1) {
-					logError(e1.getClass().getName() + " : " + e1.getMessage());
+					error(e1.getClass().getName() + " : " + e1.getMessage());
 				}
 				getCurrentSequence().painterChanged(null);
 			}
@@ -416,9 +416,9 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 					Mask m = stack.getActiveMask();
 					m.filterSize(Integer.parseInt(tfFilterSize.getText()));
 				} catch (MaskException e1) {
-					logError(e1.getClass().getName() + " : " + e1.getMessage());
+					error(e1.getClass().getName() + " : " + e1.getMessage());
 				} catch (NumberFormatException e2) {
-					logError(e2.getClass().getName() + " : " + e2.getMessage());
+					error(e2.getClass().getName() + " : " + e2.getMessage());
 				}
 				getCurrentSequence().painterChanged(null);
 			}
@@ -482,7 +482,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 					}
 
 				} catch (PersistenceException e1) {
-					logError(e1.getClass().getName() + " : " + e1.getMessage());
+					error(e1.getClass().getName() + " : " + e1.getMessage());
 				}
 				return;
 			}
@@ -500,7 +500,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 						rep.save(getStack(), f);
 					}
 				} catch (PersistenceException e1) {
-					logError(e1.getClass().getName() + " : " + e1.getMessage());
+					error(e1.getClass().getName() + " : " + e1.getMessage());
 				}
 				return;
 			}
@@ -523,7 +523,7 @@ public class MaskEditor extends BackupAndPainterManagerSingletonPlugin<MaskStack
 				reInitColorMap();
 				stack.createNewMask(MaskStack.MASK_DEFAULT_LABEL, true, colorMap.get(0), getGlobalOpacity());
 			} catch (MaskException e) {
-				logError(e.getClass().getName() + " : " + e.getMessage());
+				error(e.getClass().getName() + " : " + e.getMessage());
 			}
 			addBackupObject(stack);
 		}

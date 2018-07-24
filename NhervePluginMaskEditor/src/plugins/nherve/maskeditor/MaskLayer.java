@@ -327,7 +327,7 @@ class MaskLayer extends JPanel implements ActionListener, ItemListener, MouseLis
 						try {
 							mask.add(roi);
 						} catch (MaskException e1) {
-							editor.logError(e1.getClass().getName() + " : " + e1.getMessage());
+							editor.error(e1.getClass().getName() + " : " + e1.getMessage());
 						}
 					}
 				}
@@ -340,7 +340,7 @@ class MaskLayer extends JPanel implements ActionListener, ItemListener, MouseLis
 						try {
 							mask.remove(roi);
 						} catch (MaskException e1) {
-							editor.logError(e1.getClass().getName() + " : " + e1.getMessage());
+							editor.error(e1.getClass().getName() + " : " + e1.getMessage());
 						}
 					}
 				}
@@ -365,7 +365,7 @@ class MaskLayer extends JPanel implements ActionListener, ItemListener, MouseLis
 				try {
 					editor.getStack().addPreviousInStack(mask);
 				} catch (MaskException e1) {
-					editor.logError(e1.getClass().getName() + " : " + e1.getMessage());
+					editor.error(e1.getClass().getName() + " : " + e1.getMessage());
 				}
 				editor.refreshInterface();
 			}
@@ -373,7 +373,7 @@ class MaskLayer extends JPanel implements ActionListener, ItemListener, MouseLis
 				try {
 					editor.getStack().intersectPreviousInStack(mask);
 				} catch (MaskException e1) {
-					editor.logError(e1.getClass().getName() + " : " + e1.getMessage());
+					editor.error(e1.getClass().getName() + " : " + e1.getMessage());
 				}
 				editor.refreshInterface();
 			}
